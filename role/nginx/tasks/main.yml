@@ -1,0 +1,19 @@
+---
+
+- name: Import nginx_signing_key
+  command: /bin/rpm --import http://nginx.org/keys/nginx_signing.key
+
+- name: Add nginx_repository
+  copy: src=nginx.repo dest=/etc/yum.repos.d/nginx.repo owner=root group=root mode=644
+
+- name: Install nginx
+  yum: name=nginx state=present
+
+- name: Delete default file
+  file: path=/etc/nginx/conf.d/{{ item }} state=absent
+  with_items:
+    - default.conf
+    - example_ssl.conf
+
+- name: Replace nginx_setting
+  template: src=nginx-django-project.conf.j2 dest=/etc/nginx/conf.d/{{ app_name}}.conf owner=root group=root mode=644

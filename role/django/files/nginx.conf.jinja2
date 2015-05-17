@@ -1,0 +1,35 @@
+
+# the upstream component nginx needs to connect to
+upstream {{ app_name }} {
+    # For unix socket
+    server unix:///run/uwsgi/{{ app_name }}.sock;
+    # For tcp socket
+    # server 127.0.0.1:3031;
+}
+
+server {
+    listen *:80;
+    listen *:443 default_server ssl;
+
+    server_tokens off;
+    server_name {{ ansible_hostname }};
+
+    client_max_body_size 25M;
+
+    access_log  /var/log/nginx/{{ app_name  }}.log;
+    error_log   /var/log/nginx/{{ app_name  }}_error.log;
+
+    location /media {
+        alias {{ app_dir }}{{ app_name  }}/media;
+    }
+
+    location /static {
+        alias {{ app_dir }}{{ app_name  }}/static;
+    }
+
+    # Finally, send all non-media requests to the Django server.
+    location / {
+        include uwsgi_params;
+        uwsgi_pass {{ app_name  }};
+    }
+}

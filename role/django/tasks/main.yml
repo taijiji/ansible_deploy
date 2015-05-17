@@ -1,0 +1,15 @@
+---
+
+- name: Replace nginx_setting
+  template: src=nginx_django.conf.jinja2 dest=/etc/nginx/conf.d/{{ app_name}}.conf owner=root group=root mode=644
+
+- name: Copy uwsgi rpms
+  copy: src={{ item.filename }} dest=/tmp/ owner=root group=root
+  with_items: uwsgi_packages
+
+- name: Install uwsgi rpms
+  yum: name=/tmp/{{ item.filename }} state=present
+  with_items: uwsgi_packages
+
+- name: Replace uwsgi config
+  template: src=uwsgi-your-django-project.ini.j2 dest=/etc/uwsgi.d/{{ app_name  }}.ini owner=uwsgi group=uwsgi mode=644

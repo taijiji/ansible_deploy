@@ -1,0 +1,10 @@
+---
+- hosts: web
+  remote_user: vagrant
+  app_name: sample_app
+  vars:
+      app_dir: /var/www
+  role:
+    - nginx
+    - mariadb
+    - django

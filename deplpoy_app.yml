@@ -1,0 +1,28 @@
+---
+
+- hosts: web 
+  user: your_username 
+  sudo: yes
+  vars:
+    app_name: 'your_appname'
+    remote_repo: 'your_app_repository.git'
+    work_dir: '/home/your_appname/{{ app_name }}/'
+    target_dir: '/var/www/your_username/'
+  tasks:
+    - name: git clone application
+      git: repo={{ remote_repo }} dest={{ work_dir }}
+           clone=yes
+           track_submodules=yes
+           force=yes
+      sudo: no
+    - name: remove old app data
+      file: path={{ target_dir }}{{app_name}}/ state=absent
+    - name: move and chown application data
+      copy: src={{ work_dir }}/
+            dest={{ target_dir }}
+            owner=nginx group=nginx
+    - name: restart nginx
+      service: named=nginx state=restarted
+
+    - name: restart uwsig
+      service: named=uwsgi state=restarted
